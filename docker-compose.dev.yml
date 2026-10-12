@@ -28,7 +28,7 @@ services:
       - dev_data:/data
     environment:
       - SQL_DSN=postgresql://root:123456@postgres:5432/new-api
-      - REDIS_CONN_STRING=redis://redis
+      - REDIS_CONN_STRING=redis://:123456@redis:6379
       - TZ=Asia/Shanghai
       - BATCH_UPDATE_ENABLED=true
       # Local HTTP dev mode: keep Secure=false and leave TRUSTED_URL unset. This disables the refresh/logout OriginGuard so the :5173 -> :3000 dev proxy works.
@@ -45,14 +45,17 @@ services:
       - dev-network
 
   redis:
-    image: redis:7-alpine
+    image: redis:latest
     container_name: new-api-dev-redis
     restart: unless-stopped
     networks:
       - dev-network
+    command: [ "redis-server", "--requirepass", "123456" ]  # ⚠️ IMPORTANT: Change this password in production!
+    ports:
+      - "6378:6379"
 
   postgres:
-    image: postgres:15-alpine
+    image: postgres:15
     container_name: new-api-dev-pg
     restart: unless-stopped
     environment:
@@ -68,6 +71,8 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+    ports:
+      - "5432:5432"
 
 volumes:
   dev_data:
