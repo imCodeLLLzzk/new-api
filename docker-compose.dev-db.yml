@@ -1,0 +1,42 @@
+# Development Database Services Only
+# Run: docker compose -f docker-compose.dev-db.yml up -d
+# Then run backend directly on host: air (or go run main.go)
+# And run frontend: cd web && bun run dev
+
+services:
+  redis:
+    image: redis:latest
+    container_name: new-api-dev-redis
+    restart: unless-stopped
+    command: ["redis-server", "--requirepass", "123456"]
+    ports:
+      - "6378:6379"
+    networks:
+      - dev-network
+
+  postgres:
+    image: postgres:15
+    container_name: new-api-dev-pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: new-api
+    volumes:
+      - dev_pg_data:/var/lib/postgresql/data
+    networks:
+      - dev-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d new-api"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    ports:
+      - "5432:5432"
+
+volumes:
+  dev_pg_data:
+
+networks:
+  dev-network:
+    driver: bridge
