@@ -339,6 +339,9 @@ func migrateDB() error {
 		common.SysError(common.LogText("failed to migrate options primary key: %s", err.Error()))
 	}
 
+	/***
+	全局数据库初始化-表结构创建
+	*/
 	err := DB.AutoMigrate(
 		&Channel{},
 		&Token{},
