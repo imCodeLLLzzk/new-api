@@ -1,0 +1,63 @@
+# test Database Services Only
+# 相较于本地引入了clickHouse ,三者组成独立于服务的存储容器编排,方便服务端单独更新
+
+
+services:
+  redis:
+    image: redis:latest
+    container_name: new-api-dev-redis
+    restart: unless-stopped
+    command: ["redis-server", "--requirepass", "123456"]
+    ports:
+      - "6378:6379"
+    networks:
+      - dev-network
+
+  postgres:
+    image: postgres:15
+    container_name: new-api-dev-pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: new-api
+    volumes:
+      - dev_pg_data:/var/lib/postgresql/data
+    networks:
+      - dev-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d new-api"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    ports:
+      - "5432:5432"
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: new-api-dev-clickhouse
+    restart: unless-stopped
+    environment:
+      CLICKHOUSE_USER: root
+      CLICKHOUSE_PASSWORD: 123456
+      CLICKHOUSE_DB: new-api
+    ports:
+      - "8123:8123"   # HTTP 接口（绝大多数客户端和 API 使用此端口）
+      - "9000:9000"   # Native 接口（ClickHouse 专属高性能客户端使用）
+    volumes:
+      - dev_ch_data:/var/lib/clickhouse
+    networks:
+      - dev-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  dev_pg_data:
+  dev_ch_data: # 自动为 ClickHouse 分配持久化存储卷
+
+networks:
+  dev-network:
+    driver: bridge

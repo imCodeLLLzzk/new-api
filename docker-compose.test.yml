@@ -1,0 +1,27 @@
+version: '3.4'
+
+services:
+  new-api:
+    image: calciumion/new-api:latest
+    container_name: new-api-app-webgit fetch upstream
+    restart: unless-stopped
+    command: --log-dir /app/logs
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./data:/data
+      - ./logs:/app/logs
+    environment:
+      - SQL_DSN=postgresql://root:123456@new-api-dev-pg:5432/new-api
+      - REDIS_CONN_STRING=redis://:123456@new-api-dev-redis:6379/0
+      - TZ=Asia/Shanghai
+      - ERROR_LOG_ENABLED=true
+      - BATCH_UPDATE_ENABLED=true
+    networks:
+      - dev-network
+
+#这个 networks 必须【完全顶格】写在最左侧，前面绝对不能有空格
+networks:
+  dev-network:
+    external:
+      name: new_api_storage_dev-network
