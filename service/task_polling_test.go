@@ -183,6 +183,12 @@ func TestRedactVideoResponseBodyDropsInteractionInlineVideo(t *testing.T) {
 	assert.Equal(t, "done", content[1].(map[string]any)["text"])
 }
 
+func TestRedactVideoResponseBodyKeepsUntouchedBytes(t *testing.T) {
+	body := []byte(`{"name":"op","response":{"videos":[{"uri":"u","bytesBase64Encoded":"x"}],"durationSeconds":8.0,"bytesBase64Encoded":"y"},"done":true}`)
+
+	assert.Equal(t, `{"name":"op","response":{"videos":[{"uri":"u"}],"durationSeconds":8.0},"done":true}`, string(redactVideoResponseBody(body)))
+}
+
 func seedTaskPollingChannel(t *testing.T, id int, disableSleep bool) {
 	t.Helper()
 	ch := &model.Channel{
