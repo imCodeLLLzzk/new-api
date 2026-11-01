@@ -373,7 +373,8 @@ func writeTaskMediaContentPath(c *gin.Context, body io.Reader, descriptor *relay
 			message: "Artifact upstream returned an error",
 		}
 	}
-	if operation.Get("done").Type != gjson.True {
+	// An interaction reports completion through status, not done.
+	if operation.Get("done").Type != gjson.True && operation.Get("status").String() != "completed" {
 		return &taskMediaProxyError{
 			status: http.StatusConflict, code: "artifact_not_ready",
 			message: "Task artifacts are not ready",
