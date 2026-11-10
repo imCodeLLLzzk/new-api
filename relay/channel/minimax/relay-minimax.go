@@ -9,6 +9,7 @@ import (
 	"github.com/QuantumNous/new-api/relaykit/types"
 )
 
+// TODO 版本过于陈旧缺少Response 类型
 func GetRequestURL(info *relaycommon.RelayInfo) (string, error) {
 	baseUrl := info.ChannelBaseUrl
 	if baseUrl == "" {
@@ -25,6 +26,8 @@ func GetRequestURL(info *relaycommon.RelayInfo) (string, error) {
 			return fmt.Sprintf("%s/v1/image_generation", baseUrl), nil
 		case constant.RelayModeAudioSpeech:
 			return fmt.Sprintf("%s/v1/t2a_v2", baseUrl), nil
+		case constant.RelayModeResponses:
+			return fmt.Sprintf("%s/v1/responses", baseUrl), nil
 		default:
 			return "", fmt.Errorf("unsupported relay mode: %d", info.RelayMode)
 		}
