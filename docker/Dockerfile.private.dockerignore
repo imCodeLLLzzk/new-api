@@ -1,0 +1,24 @@
+# Ignore rules for Dockerfile.private (self-hosted / private registry build).
+# Mirrors the upstream .dockerignore and additionally drops local runtime
+# state, IDE metadata and the codegraph/omo symlink targets.
+.github
+.git
+*.md
+.vscode
+.idea
+.gitignore
+Makefile
+docs
+.eslintcache
+.gocache
+codegraph
+.codegraph
+.omo
+/data
+/logs
+/electron/node_modules
+/web/node_modules
+/web/dist
+!THIRD-PARTY-LICENSES.md
+
+buildkitd.toml

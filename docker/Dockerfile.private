@@ -1,0 +1,113 @@
+# NOTE: no `# syntax=` directive on purpose. The docker-container builder cannot
+# reach registry-1.docker.io directly, and the directive forces a pull of the
+# external dockerfile frontend image. The features used below (multi-stage,
+# ARG before FROM, RUN --mount=type=cache) are all supported by the built-in
+# frontend of the bundled BuildKit.
+#
+# Private-registry build for new-api.
+#
+# Differences from the upstream ./Dockerfile:
+#   - builder stages run on $BUILDPLATFORM and cross-compile to $TARGETPLATFORM,
+#     so a multi-arch image can be produced on an Apple Silicon / arm64 host
+#     without emulating the target under QEMU.
+#   - GOPROXY is an ARG (defaults to goproxy.cn) because the default
+#     proxy.golang.org is not reachable from the CN network.
+#   - BuildKit cache mounts for the Go module/build cache and the Bun install
+#     cache, so repeated builds do not re-download everything.
+#   - APP_VERSION can be overridden at build time; it falls back to ./VERSION.
+#   - base image digests are intentionally NOT pinned: a digest pins one
+#     platform only and would break multi-arch (manifest list) builds.
+#
+# Build & push (run from the repository root, the build context is the repo):
+#   docker buildx create --name mybuilder --driver docker-container \
+#     --config docker/buildkitd.toml --bootstrap
+#   docker buildx build --builder mybuilder -f docker/Dockerfile.private \
+#     --platform linux/amd64,linux/arm64 \
+#     --build-arg APP_VERSION=v1.0.0 \
+#     -t 192.168.0.163:5000/new-api:latest \
+#     --push .
+#
+# The companion buildkitd.toml is only required for a docker-container builder
+# that cannot reach registry-1.docker.io directly (it does not inherit the
+# daemon's registry-mirrors) or that pushes to a plain-HTTP registry.
+# The default desktop-linux (docker driver) builder needs no extra config.
+
+# ---------------------------------------------------------------------------
+# Stage 1: web console (React / Rsbuild / Tailwind)
+# ---------------------------------------------------------------------------
+FROM --platform=$BUILDPLATFORM oven/bun:1.4.4 AS web-builder
+
+ARG APP_VERSION
+
+WORKDIR /build/web
+
+# Dependencies first so the install layer is cached independently of the source.
+COPY web/package.json web/bun.lock ./
+RUN --mount=type=cache,target=/root/.bun/install/cache \
+    bun install --frozen-lockfile
+
+COPY ./web ./
+# The frontend is platform independent, so it is always built for BUILDPLATFORM.
+RUN --mount=type=cache,target=/root/.bun/install/cache \
+    DISABLE_ESLINT_PLUGIN='true' \
+    VITE_REACT_APP_VERSION=${APP_VERSION:-dev} \
+    bun run build
+
+# ---------------------------------------------------------------------------
+# Stage 2: Go backend
+# ---------------------------------------------------------------------------
+FROM --platform=$BUILDPLATFORM golang:1.26.10-alpine AS go-builder
+
+ARG TARGETOS
+ARG TARGETARCH
+ARG APP_VERSION
+ARG GOPROXY=https://goproxy.cn,direct
+
+ENV GO111MODULE=on CGO_ENABLED=0 GOWORK=off
+ENV GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64}
+ENV GOEXPERIMENT=greenteagc
+ENV GOPROXY=${GOPROXY}
+
+WORKDIR /build
+
+ADD go.mod go.sum ./
+# relaykit and tokenkit are local submodules referenced via replace; their
+# go.mod files must be present for go mod download to resolve the main module graph.
+ADD relaykit/go.mod ./relaykit/go.mod
+ADD tokenkit/go.mod ./tokenkit/go.mod
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go mod download
+
+COPY . .
+COPY --from=web-builder /build/web/dist ./web/dist
+
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    version="${APP_VERSION:-$(cat VERSION)}" && \
+    go build \
+      -pgo="$(go list -m -f '{{.Dir}}' github.com/Calcium-Ion/moejs)/default.pgo" \
+      -ldflags "-s -w -X 'github.com/QuantumNous/new-api/common.Version=${version}'" \
+      -o new-api
+
+# ---------------------------------------------------------------------------
+# Stage 3: runtime
+# ---------------------------------------------------------------------------
+FROM debian:bookworm-slim
+
+ARG APP_VERSION
+LABEL org.opencontainers.image.title="new-api" \
+      org.opencontainers.image.description="AI API gateway / proxy (private build)" \
+      org.opencontainers.image.version="${APP_VERSION:-dev}"
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates tzdata libasan8 wget \
+    && rm -rf /var/lib/apt/lists/* \
+    && update-ca-certificates
+
+COPY --from=go-builder /build/new-api /
+COPY LICENSE NOTICE THIRD-PARTY-LICENSES.md /licenses/
+
+EXPOSE 3000
+WORKDIR /data
+ENTRYPOINT ["/new-api"]
