@@ -2,6 +2,25 @@
 
 DO NOT send optional commentary
 
+## Navigation — 分片路由索引
+
+本仓库按目录分片存放上下文。**修改某模块前，先读该模块目录下的 `AGENTS.md`，再动手**；不要为了理解一个局部任务而全量扫描文件树。
+
+| 任务类型 | 必读分片 |
+| --- | --- |
+| 新增/修改上游供应商适配器、协议转换、渠道 URL 与请求头、Responses/Claude/Gemini 流式处理 | `relay/AGENTS.md` |
+| 新增/修改 HTTP 接口、管理台 handler、鉴权中间件接线、响应文案 | `controller/AGENTS.md` |
+| 数据表结构、GORM 查询与 tag、迁移脚本、行锁、跨 SQLite/MySQL/PostgreSQL 兼容 | `model/AGENTS.md` |
+| 业务规则、渠道选路、计费与结算、认证会话、JWT、授权判定、异步任务 | `service/AGENTS.md` |
+| 前端页面与 feature 模块、API 调用封装、组件复用、i18n 文案、feature 内测试 | `web/src/features/AGENTS.md` |
+| 前端通用规范（i18n、组件、测试、样式、无障碍、依赖、构建） | `web/AGENTS.md` |
+| 任务插件（JS）、插件宿主 API、插件元数据与计费字段描述 | `docs/plugin-api/v1.md`（先读） |
+| 计费表达式、预扣/结算/退款、模型价格、用量推导 | `.agents/rules/billing.md`（先读，触发清单见本文件 Billing rules 一节） |
+
+分片文件清单（均在各目录根）：`relay/AGENTS.md`、`controller/AGENTS.md`、`model/AGENTS.md`、`service/AGENTS.md`、`web/src/features/AGENTS.md`、`web/AGENTS.md`。
+
+每个分片都写明四件事：该目录职责与核心入口、**检索禁令**（哪些目录是同构噪音、禁止盲目遍历）、**模式锚点**（唯一该参考的样板文件）、**局部验证命令**（只针对该目录，禁止全量构建）。
+
 ## Overview
 
 This is an AI API gateway/proxy built with Go. It aggregates 40+ upstream AI providers (OpenAI, Claude, Gemini, Azure, AWS Bedrock, etc.) behind a unified API, with user management, billing, rate limiting, and an admin dashboard.
