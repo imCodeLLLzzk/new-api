@@ -1,4 +1,3 @@
-
 # NOTE: no `# syntax=` directive on purpose. The docker-container builder cannot
 # reach registry-1.docker.io directly, and the directive forces a pull of the
 # external dockerfile frontend image. The features used below (multi-stage,
@@ -24,16 +23,9 @@
 #     --config docker/buildkitd.toml --bootstrap
 #   docker buildx build --builder mybuilder -f docker/Dockerfile.private \
 #     --platform linux/amd64,linux/arm64 \
-#     --build-arg APP_VERSION="$(git describe --tags --always --dirty)" \
+#     --build-arg APP_VERSION=v1.0.0 \
 #     -t 192.168.0.163:5000/new-api:latest \
 #     --push .
-#
-# APP_VERSION ends up in both the Go binary (common.Version) and the web bundle
-# (VITE_REACT_APP_VERSION). Derive it with `git describe --tags --always --dirty`
-# so it reflects the exact commit. Do NOT use `--abbrev=0`: it drops the commit
-# count and yields a stale tag when HEAD is many commits past the last release.
-# For a tagged release, pass the release tag explicitly instead.
-# When APP_VERSION is omitted, it falls back to the repo's VERSION file.
 #
 # The companion buildkitd.toml is only required for a docker-container builder
 # that cannot reach registry-1.docker.io directly (it does not inherit the
