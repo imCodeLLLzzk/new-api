@@ -10,3 +10,8 @@ docs
 /web/node_modules
 /web/dist
 !THIRD-PARTY-LICENSES.md
+
+# Deployment secrets must never enter the build context (the Go stage does `COPY . .`)
+docker/env.production
+docker/.env.production
+.env.production
