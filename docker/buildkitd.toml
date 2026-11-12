@@ -1,0 +1,20 @@
+# BuildKit daemon configuration for the private multi-arch build.
+#
+# The docker-container driver does NOT inherit the Docker daemon's
+# registry-mirrors setting, so docker.io has to be mirrored here explicitly;
+# otherwise pulling docker.io/library/* fails with a connect timeout.
+#
+# Usage:
+#   docker buildx create --name mybuilder --driver docker-container \
+#     --config buildkitd.toml --bootstrap
+[registry]
+  [registry."docker.io"]
+    mirrors = [
+      "docker.m.daocloud.io",
+      "docker.1ms.run"
+    ]
+
+  # The private registry speaks plain HTTP on the LAN.
+  [registry."192.168.0.163:5000"]
+    http = true
+    insecure = true
