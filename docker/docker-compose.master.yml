@@ -1,0 +1,26 @@
+version: '3.4'
+
+services:
+  new-api:
+    image: 192.168.0.163:5000/new-api:latest
+    container_name: new-api-app-web
+    restart: unless-stopped
+    command: --log-dir /app/logs
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./data:/data
+      - ./logs:/app/logs
+    environment:
+      SQL_DSN: "postgresql://root:123456@192.168.0.136:5432/new-api"
+      REDIS_CONN_STRING: "redis://:123456@192.168.0.136:6378/0"
+      LOG_SQL_DSN: "clickhouse://root:123456@192.168.0.136:9000/new-api"
+      SESSION_SECRET: "bbcd9f6314fc71e2ec3baba1ec2915d7ec6ec5b3ce2a249c6d771b3ca4323b4f"
+      CRYPTO_SECRET: "bbcd9f6314fc71e2ec3baba1ec2915d7ec6ec5b3ce2a249c6d771b3ca4323b4f"
+      NODE_TYPE: "master"
+      NODE_NAME: "node-1"
+      SQL_MAX_OPEN_CONNS: "20"
+      SQL_MAX_IDLE_CONNS: "5"
+      TZ: "Asia/Shanghai"
+      ERROR_LOG_ENABLED: "true"
+      BATCH_UPDATE_ENABLED: "true"

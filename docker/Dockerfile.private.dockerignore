@@ -22,3 +22,9 @@ codegraph
 !THIRD-PARTY-LICENSES.md
 
 buildkitd.toml
+
+# Never let deployment secrets enter the build context: the Go stage runs
+# `COPY . .`, so an env file with real credentials would end up in a layer.
+docker/env.production
+docker/.env.production
+.env.production
