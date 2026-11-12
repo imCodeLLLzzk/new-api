@@ -1,0 +1,8 @@
+# 放在 New API 根目录：sgconfig.yml 忽略前端静态文件扫描
+ruleDirs:
+  - .ast-grep/rules
+ignores:
+  - web/node_modules/**
+  - web/dist/**
+  - web/src/i18n/locales/**
+  - .git/**
