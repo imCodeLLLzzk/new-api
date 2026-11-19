@@ -18,130 +18,222 @@ For commercial licensing, please contact support@quantumnous.com
 */
 /**
  * Home page constants
- * All hardcoded data for home page sections
+ *
+ * Every visible string lives here as an English source string so it can be
+ * translated through i18next. Section components must render these through
+ * `t(...)` — never hardcode display text inside the components themselves.
  */
-import { type TFunction } from 'i18next'
 
-// Layout - Main base classes
-export const MAIN_BASE_CLASSES = 'bg-background text-foreground w-full'
+/** Brand identity of the landing page. */
+export const BRAND = {
+  name: 'LUI',
+  /** Public site address, also used as the relay base URL shown to users. */
+  site: 'https://luiai.cc.cd',
+  /** OpenAI-compatible base URL users paste into their client. */
+  baseUrl: 'https://luiai.cc.cd/v1',
+  /** Short positioning line used in metadata and badges. */
+  tagline: 'Unified Model Access',
+} as const
 
-// Hero section - AI Applications (Left side)
-export const AI_APPLICATIONS = [
-  'LobeHub.Color',
-  'Dify.Color',
-  'OpenWebUI',
-  'Cline',
+// ---------------------------------------------------------------------------
+// Hero
+// ---------------------------------------------------------------------------
+
+export const HERO_BADGE = 'Unified model access'
+
+export const HERO_TITLE_LEAD = 'One key for'
+export const HERO_TITLE_ACCENT = 'every frontier model'
+
+export const HERO_DESCRIPTION =
+  'LUI puts GPT, Claude, Gemini, DeepSeek, Qwen and more behind one OpenAI-compatible endpoint. Pay per token and watch every call as it happens.'
+
+export const HERO_BASE_URL_LABEL = 'Base URL'
+export const HERO_BASE_URL_HINT =
+  'Point your client at this address. Model names and request bodies stay exactly the same.'
+
+export const HERO_CLIENTS_LABEL = 'Works out of the box with'
+
+export const HERO_PRIMARY_CTA = 'Get Started'
+export const HERO_SECONDARY_CTA = 'View Pricing'
+export const HERO_DOCS_CTA = 'Documentation'
+export const HERO_DASHBOARD_CTA = 'Go to Dashboard'
+
+// ---------------------------------------------------------------------------
+// Stats
+// ---------------------------------------------------------------------------
+
+export const HOME_STATS = [
+  { end: 120, suffix: '+', decimals: 0, label: 'upstream models' },
+  { end: 200, suffix: '+', decimals: 0, label: 'per-model pricing rules' },
+  { end: 40, suffix: '+', decimals: 0, label: 'compatible API routes' },
+  { end: 99.9, suffix: '%', decimals: 1, label: 'route availability' },
 ] as const
 
-// Hero section - AI Models (Right side)
-export const AI_MODELS = [
-  'Qwen.Color',
-  'DeepSeek.Color',
-  'Doubao.Color',
-  'OpenAI',
-  'Claude.Color',
-  'Gemini.Color',
-] as const
+// ---------------------------------------------------------------------------
+// Features
+// ---------------------------------------------------------------------------
 
-// Hero section - Gateway Features
-export const GATEWAY_FEATURES = [
-  'Cost Tracking',
-  'Model Access',
-  'Guardrails',
-  'Observability',
-  'Budgets',
-  'Load Balancing',
-  'Rate Limiting',
-  'Token Mgmt',
-  'Prompt Caching',
-  'Pass-Through',
-] as const
+export const FEATURES_HEADING_LABEL = 'Why LUI'
+export const FEATURES_HEADING_LEAD = 'Every mainstream model,'
+export const FEATURES_HEADING_ACCENT = 'one endpoint is enough'
 
-// Stats section - Default statistics
-export const DEFAULT_STATS = [
+export const HOME_FEATURES = [
   {
-    value: '50',
-    suffix: '+',
-    description: 'upstream services integrated',
-  },
-  {
-    value: '100',
-    suffix: '+',
-    description: 'model billing support',
-  },
-  {
-    value: '50',
-    suffix: '+',
-    description: 'compatible API routes',
-  },
-  {
-    value: '10',
-    suffix: '+',
-    description: 'scheduling controls',
-  },
-] as const
-
-// Features section - Default features
-export const DEFAULT_FEATURES = [
-  {
-    title: 'Lightning Fast',
+    id: 'protocol',
+    num: '01',
+    title: 'One protocol for every model',
     description:
-      'Optimized network architecture ensures millisecond response times',
-    iconName: 'Zap',
-  },
-  {
-    title: 'Secure & Reliable',
-    description:
-      'Enterprise-grade security with comprehensive permission management',
-    iconName: 'Shield',
-  },
-  {
-    title: 'Global Coverage',
-    description: 'Multi-region deployment for stable global access',
-    iconName: 'Globe',
-  },
-  {
-    title: 'Developer Friendly',
-    description: 'Compatible API routes for common AI application workflows',
+      'OpenAI, Anthropic and Gemini request shapes are translated in one place. Switch models by changing the model name — nothing else.',
     iconName: 'Code',
+    span: 'md:col-span-2',
+    accent: 'blue',
   },
   {
-    title: 'High Performance',
-    description: 'Support for high concurrency with automatic load balancing',
-    iconName: 'Gauge',
-  },
-  {
-    title: 'Transparent Billing',
-    description: 'Pay-as-you-go with real-time usage monitoring',
+    id: 'billing',
+    num: '02',
+    title: 'Billed per token, in real time',
+    description:
+      'Input and output tokens are metered on every request and settled instantly. The console shows exactly which call cost what.',
     iconName: 'DollarSign',
+    span: 'md:col-span-1',
+    accent: 'emerald',
   },
   {
-    title: 'Team Collaboration',
-    description: 'Multi-user management with flexible permission allocation',
-    iconName: 'Users',
+    id: 'failover',
+    num: '03',
+    title: 'Redundant routes, automatic failover',
+    description:
+      'The same model is served by several upstreams. Priority, weight and retry rules keep traffic flowing when one line drops.',
+    iconName: 'Shield',
+    span: 'md:col-span-1',
+    accent: 'amber',
   },
   {
-    title: 'Open Source',
-    description: 'Community driven, self-hosted, and extensible',
-    iconName: 'HeartHandshake',
+    id: 'throughput',
+    num: '04',
+    title: 'Built for real throughput',
+    description:
+      'Streaming responses stay open end to end, with concurrency handled by the scheduler instead of hard client-side caps.',
+    iconName: 'Gauge',
+    span: 'md:col-span-2',
+    accent: 'violet',
   },
 ] as const
 
-export function getGatewayFeatures(t: TFunction) {
-  return GATEWAY_FEATURES.map((feature) => t(feature))
-}
+export const HOME_FEATURES_EXTRA = [
+  {
+    title: 'Keys and groups',
+    description:
+      'Issue scoped API keys per team and bind them to model groups, quotas and expiry dates.',
+    iconName: 'KeyRound',
+  },
+  {
+    title: 'Full request log',
+    description:
+      'Every request keeps status code, latency and token usage so a slow response can always be traced back.',
+    iconName: 'ScrollText',
+  },
+  {
+    title: 'Multi-channel routing',
+    description:
+      'Move traffic between upstreams with weights and affinity rules, and move it back in one click.',
+    iconName: 'GitBranch',
+  },
+  {
+    title: 'Quota alerts',
+    description:
+      'Set a balance threshold once and get notified before the account runs dry mid-traffic.',
+    iconName: 'BellRing',
+  },
+] as const
 
-export function getDefaultStats(t: TFunction) {
-  return DEFAULT_STATS.map((stat) => ({
-    ...stat,
-    description: stat.description ? t(stat.description) : undefined,
-  }))
-}
+// ---------------------------------------------------------------------------
+// How it works
+// ---------------------------------------------------------------------------
 
-export function getDefaultFeatures(t: TFunction) {
-  return DEFAULT_FEATURES.map((feature) => ({
-    ...feature,
-    title: t(feature.title),
-    description: t(feature.description),
-  }))
-}
+export const STEPS_HEADING_LABEL = 'How it works'
+export const STEPS_HEADING = 'Three steps to your first call'
+
+export const HOME_STEPS = [
+  {
+    num: '1',
+    title: 'Claim your key',
+    description:
+      'Create an account, top up or take the trial quota, and generate an API key for your team.',
+    iconName: 'KeyRound',
+  },
+  {
+    num: '2',
+    title: 'Swap the base URL',
+    description:
+      'Point the client at the LUI endpoint. Keep the model name, keep the request body.',
+    iconName: 'ArrowLeftRight',
+  },
+  {
+    num: '3',
+    title: 'Ship the request',
+    description:
+      'Call it exactly as you called OpenAI. Usage, cost and latency show up in the console as it lands.',
+    iconName: 'Send',
+  },
+] as const
+
+// ---------------------------------------------------------------------------
+// Client compatibility
+// ---------------------------------------------------------------------------
+
+export const MODELS_HEADING_LABEL = 'Model matrix'
+export const MODELS_HEADING = 'One endpoint for every model family'
+
+export const CLIENTS_HEADING_LABEL = 'Drop-in compatible'
+export const CLIENTS_HEADING = 'Works with the tools you already use'
+
+export const HOME_CLIENTS = [
+  { name: 'Cherry Studio', icon: 'CherryStudio.Color' },
+  { name: 'LobeChat', icon: 'LobeHub.Color' },
+  { name: 'OpenWebUI', icon: 'OpenWebUI' },
+  { name: 'SillyTavern', icon: 'SillyTavern.Color' },
+  { name: 'Dify', icon: 'Dify.Color' },
+  { name: 'FastGPT', icon: 'FastGPT.Color' },
+  { name: 'Cursor', icon: 'Cursor' },
+  { name: 'Claude Code', icon: 'ClaudeCode.Color' },
+  { name: 'Codex', icon: 'Codex.Color' },
+  { name: 'OpenCode', icon: 'OpenCode' },
+  { name: 'Hermes', icon: 'HermesAgent' },
+  { name: 'Cline', icon: 'Cline' },
+  { name: 'Roo Code', icon: 'RooCode' },
+  { name: 'Kilo Code', icon: 'KiloCode' },
+  { name: 'Windsurf', icon: 'Windsurf' },
+  { name: 'Trae', icon: 'Trae.Color' },
+  { name: 'Qoder', icon: 'Qoder.Color' },
+  { name: 'Gemini CLI', icon: 'GeminiCLI.Color' },
+  { name: 'Devin', icon: 'Devin.Color' },
+  { name: 'DeepSeek Harness', icon: 'DeepSeek.Color' },
+] as const
+
+export const HOME_MODELS = [
+  { name: 'OpenAI', icon: 'OpenAI.Color' },
+  { name: 'Claude', icon: 'Claude.Color' },
+  { name: 'Gemini', icon: 'Gemini.Color' },
+  { name: 'DeepSeek', icon: 'DeepSeek.Color' },
+  { name: 'Qwen', icon: 'Qwen.Color' },
+  { name: 'Grok', icon: 'Grok.Color' },
+  { name: 'Mistral', icon: 'Mistral.Color' },
+  { name: 'Kimi', icon: 'Kimi' },
+  { name: 'Cohere', icon: 'Cohere.Color' },
+  { name: 'Ollama', icon: 'Ollama.Color' },
+  { name: 'OpenRouter', icon: 'OpenRouter.Color' },
+  { name: 'SiliconFlow', icon: 'SiliconCloud.Color' },
+] as const
+
+// ---------------------------------------------------------------------------
+// CTA
+// ---------------------------------------------------------------------------
+
+export const CTA_HEADING_LEAD = 'Three minutes to your'
+export const CTA_HEADING_ACCENT = 'first API call'
+
+export const CTA_DESCRIPTION =
+  'Register, grab a key, replace one line of config. Every model above becomes reachable from the app you already run.'
+
+export const CTA_FOOTNOTE = 'No credit card required to start.'

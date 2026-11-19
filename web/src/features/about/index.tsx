@@ -17,12 +17,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useQuery } from '@tanstack/react-query'
-import { Construction } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { PublicLayout } from '@/components/layout'
 import { RichContent } from '@/components/rich-content'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useSystemConfig } from '@/hooks/use-system-config'
 import { isHttpUrl, isLikelyHtml } from '@/lib/content-format'
 import { requireServerSuccess } from '@/lib/server-error-message'
 
@@ -30,16 +30,38 @@ import { getAboutContent } from './api'
 
 function EmptyAboutState() {
   const { t } = useTranslation()
+  const { logo } = useSystemConfig()
   const currentYear = new Date().getFullYear()
 
   return (
     <div className='flex min-h-[60vh] items-center justify-center p-8'>
       <div className='max-w-2xl space-y-6 text-center'>
         <div className='flex justify-center'>
-          <Construction className='text-muted-foreground h-24 w-24' />
+          <img
+            src={logo}
+            alt='LUI'
+            className='size-16 rounded-2xl object-contain'
+          />
         </div>
         <div className='space-y-2'>
-          <h2 className='text-2xl font-bold'>{t('No About Content Set')}</h2>
+          <h2 className='text-2xl font-bold'>{t('About LUI')}</h2>
+          <p className='text-muted-foreground'>
+            {t(
+              'LUI puts every frontier model behind one OpenAI-compatible endpoint.'
+            )}
+          </p>
+        </div>
+        <div className='space-y-2 text-sm'>
+          <p>
+            <a
+              href='https://luiai.cc.cd'
+              target='_blank'
+              rel='noopener noreferrer'
+              className='text-primary hover:underline'
+            >
+              luiai.cc.cd
+            </a>
+          </p>
           <p className='text-muted-foreground'>
             {t(
               'The administrator has not configured any about content yet. You can set it in the settings page, supporting HTML or URL.'
@@ -47,6 +69,9 @@ function EmptyAboutState() {
           </p>
         </div>
         <div className='space-y-4 text-sm'>
+          <p className='text-muted-foreground'>
+            {t('Frontend design and development by New API contributors.')}
+          </p>
           <p>
             {t('New API Project Repository:')}{' '}
             <a

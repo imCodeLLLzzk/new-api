@@ -16,73 +16,61 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Settings, Zap, BarChart3 } from 'lucide-react'
+import { ArrowLeftRight, KeyRound, Send, type LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { AnimateInView } from '@/components/animate-in-view'
 
+import { HOME_STEPS, STEPS_HEADING, STEPS_HEADING_LABEL } from '../../constants'
+
+const STEP_ICONS: Record<string, LucideIcon> = {
+  ArrowLeftRight,
+  KeyRound,
+  Send,
+}
+
 export function HowItWorks() {
   const { t } = useTranslation()
-
-  const steps = [
-    {
-      num: '1',
-      title: t('Configure'),
-      desc: t(
-        'Add your API keys, set up channels and configure access permissions'
-      ),
-      icon: <Settings className='size-6' strokeWidth={1.5} />,
-    },
-    {
-      num: '2',
-      title: t('Connect'),
-      desc: t(
-        'Connect through OpenAI, Claude, Gemini, and other compatible API routes'
-      ),
-      icon: <Zap className='size-6' strokeWidth={1.5} />,
-    },
-    {
-      num: '3',
-      title: t('Monitor'),
-      desc: t('Track usage, costs and performance with real-time analytics'),
-      icon: <BarChart3 className='size-6' strokeWidth={1.5} />,
-    },
-  ]
 
   return (
     <section className='border-border/40 relative z-10 border-t px-6 py-24 md:py-32'>
       <div className='mx-auto max-w-6xl'>
         <AnimateInView className='mb-16 text-center md:mb-20'>
           <p className='text-muted-foreground mb-3 text-xs font-medium tracking-widest uppercase'>
-            {t('How It Works')}
+            {t(STEPS_HEADING_LABEL)}
           </p>
           <h2 className='text-2xl font-bold tracking-tight md:text-3xl'>
-            {t('Three steps to get started')}
+            {t(STEPS_HEADING)}
           </h2>
         </AnimateInView>
 
         <div className='grid gap-8 md:grid-cols-3 md:gap-12'>
-          {steps.map((step, i) => (
-            <AnimateInView
-              key={step.num}
-              delay={i * 150}
-              animation='fade-up'
-              className='relative flex flex-col items-center text-center'
-            >
-              <div className='relative mb-6'>
-                <div className='text-muted-foreground border-border/50 bg-muted/30 flex size-16 items-center justify-center rounded-2xl border transition-colors'>
-                  {step.icon}
+          {HOME_STEPS.map((step, index) => {
+            const Icon = STEP_ICONS[step.iconName]
+            return (
+              <AnimateInView
+                key={step.num}
+                delay={index * 150}
+                animation='fade-up'
+                className='relative flex flex-col items-center text-center'
+              >
+                <div className='relative mb-6'>
+                  <div className='text-muted-foreground border-border/50 bg-muted/30 flex size-16 items-center justify-center rounded-2xl border transition-colors'>
+                    {Icon ? (
+                      <Icon className='size-6' strokeWidth={1.5} aria-hidden='true' />
+                    ) : null}
+                  </div>
+                  <div className='from-indigo-500 to-cyan-400 text-background absolute -top-2 -right-2 flex size-6 items-center justify-center rounded-full bg-gradient-to-br text-xs font-bold'>
+                    {step.num}
+                  </div>
                 </div>
-                <div className='bg-foreground text-background absolute -top-2 -right-2 flex size-6 items-center justify-center rounded-full text-xs font-bold'>
-                  {step.num}
-                </div>
-              </div>
-              <h3 className='mb-2 text-base font-semibold'>{step.title}</h3>
-              <p className='text-muted-foreground max-w-[240px] text-sm leading-relaxed'>
-                {step.desc}
-              </p>
-            </AnimateInView>
-          ))}
+                <h3 className='mb-2 text-base font-semibold'>{t(step.title)}</h3>
+                <p className='text-muted-foreground max-w-[240px] text-sm leading-relaxed'>
+                  {t(step.description)}
+                </p>
+              </AnimateInView>
+            )
+          })}
         </div>
       </div>
     </section>

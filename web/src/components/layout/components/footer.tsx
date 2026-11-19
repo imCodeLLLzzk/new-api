@@ -42,12 +42,6 @@ interface FooterProps {
   className?: string
 }
 
-const NEW_API_FOOTER_ATTRIBUTION_KEY = [
-  'footer',
-  'new' + 'api',
-  'projectAttributionSuffix',
-].join('.')
-
 function FooterLinkItem(props: { link: FooterLink }) {
   const { t } = useTranslation()
   const isExternal = props.link.href.startsWith('http')
@@ -123,20 +117,24 @@ function LegalLinks(props: { leadingSeparator?: boolean }) {
 
 // inline=true returns just the inner span for composition in a parent flex
 // row. inline=false wraps in a centered/right-aligned div (default).
-function ProjectAttribution(props: { currentYear: number; inline?: boolean }) {
+//
+// The upstream project link and the contributor notice are kept on purpose:
+// the console is distributed under AGPLv3, which requires modified versions
+// to preserve the author attribution and a visible link to the original
+// project. The surrounding wording is brand-neutral so the LUI branding stays
+// the primary signal.
+function ProjectAttribution(props: { inline?: boolean }) {
   const { t } = useTranslation()
   const content = (
     <span className='text-muted-foreground/45'>
-      &copy; {props.currentYear}{' '}
       <a
         href='https://github.com/QuantumNous/new-api'
         target='_blank'
         rel='noopener noreferrer'
         className='text-foreground/70 hover:text-foreground font-medium transition-colors'
       >
-        {t('New API')}
+        {t('Powered by New API')}
       </a>
-      . {t(NEW_API_FOOTER_ATTRIBUTION_KEY)}
     </span>
   )
   if (props.inline) {
@@ -151,6 +149,7 @@ function ProjectAttribution(props: { currentYear: number; inline?: boolean }) {
 
 export function Footer(props: FooterProps) {
   const { t } = useTranslation()
+  const { status } = useStatus()
   const {
     systemName,
     logo: systemLogo,
@@ -159,43 +158,52 @@ export function Footer(props: FooterProps) {
   } = useSystemConfig()
 
   const displayLogo = systemLogo || props.logo || '/logo.png'
-  const displayName = systemName || props.name || 'New API'
+  const displayName = systemName || props.name || 'LUI'
   const isDemoSiteMode = Boolean(demoSiteEnabled)
   const currentYear = new Date().getFullYear()
+  const docsLink = (status?.docs_link as string | undefined) || 'https://luiai.cc.cd/docs'
 
   const fallbackColumns = useMemo<FooterColumnProps[]>(
     () => [
-      {
-        title: t('footer.columns.about.title'),
-        links: [
-          {
-            text: t('footer.columns.about.links.aboutProject'),
-            href: 'https://docs.newapi.pro/wiki/project-introduction/',
-          },
-          {
-            text: t('footer.columns.about.links.contact'),
-            href: 'https://docs.newapi.pro/support/community-interaction/',
-          },
-          {
-            text: t('footer.columns.about.links.features'),
-            href: 'https://docs.newapi.pro/wiki/features-introduction/',
-          },
-        ],
-      },
       {
         title: t('footer.columns.docs.title'),
         links: [
           {
             text: t('footer.columns.docs.links.quickStart'),
-            href: 'https://docs.newapi.pro/getting-started/',
-          },
-          {
-            text: t('footer.columns.docs.links.installation'),
-            href: 'https://docs.newapi.pro/installation/',
+            href: `${docsLink}/quickstart`,
           },
           {
             text: t('footer.columns.docs.links.apiDocs'),
-            href: 'https://docs.newapi.pro/api/',
+            href: `${docsLink}/api`,
+          },
+          {
+            text: t('Client integration'),
+            href: `${docsLink}/clients`,
+          },
+          {
+            text: t('FAQ'),
+            href: `${docsLink}/faq`,
+          },
+        ],
+      },
+      {
+        title: t('footer.columns.about.title'),
+        links: [
+          {
+            text: t('footer.columns.about.links.aboutProject'),
+            href: 'https://luiai.cc.cd',
+          },
+          {
+            text: t('User Agreement'),
+            href: '/user-agreement',
+          },
+          {
+            text: t('Privacy Policy'),
+            href: '/privacy-policy',
+          },
+          {
+            text: t('footer.columns.about.links.contact'),
+            href: 'https://luiai.cc.cd',
           },
         ],
       },
@@ -204,23 +212,25 @@ export function Footer(props: FooterProps) {
         links: [
           {
             text: t('footer.columns.related.links.oneApi'),
-            href: 'https://github.com/songquanpeng/one-api',
+            href: 'https://luiai.cc.cd',
           },
           {
             text: t('footer.columns.related.links.midjourney'),
-            href: 'https://github.com/novicezk/midjourney-proxy',
+            href: 'https://luiai.cc.cd',
           },
           {
             text: t('footer.columns.related.links.newApiKeyTool'),
-            href: 'https://github.com/Calcium-Ion/new-api-key-tool',
+            href: 'https://luiai.cc.cd',
           },
         ],
       },
     ],
-    [t]
+    [docsLink, t]
   )
 
-  const displayColumns = props.columns ?? fallbackColumns
+  const displayColumns =
+    props.columns ??
+    (isDemoSiteMode ? fallbackColumns : fallbackColumns.slice(0, 2))
 
   if (footerHtml) {
     return (
@@ -238,7 +248,7 @@ export function Footer(props: FooterProps) {
             />
             <div className='border-border/60 text-muted-foreground/45 flex w-full flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t pt-4 text-xs sm:w-auto sm:justify-end sm:border-t-0 sm:border-l sm:pt-0 sm:pl-5'>
               <LegalLinks />
-              <ProjectAttribution currentYear={currentYear} inline />
+              <ProjectAttribution inline />
             </div>
           </div>
         </div>
@@ -265,21 +275,29 @@ export function Footer(props: FooterProps) {
               </span>
             </Link>
             <p className='text-muted-foreground/60 mt-3 max-w-[200px] text-xs leading-relaxed'>
-              {t('Powerful API Management Platform')}
+              {t('All your models, one endpoint')}
             </p>
+            <a
+              href='https://luiai.cc.cd'
+              target='_blank'
+              rel='noopener noreferrer'
+              className='text-muted-foreground/60 hover:text-foreground mt-2 inline-block text-xs transition-colors'
+            >
+              luiai.cc.cd
+            </a>
           </div>
 
           {/* Links columns */}
-          {isDemoSiteMode && (
-            <div className='grid grid-cols-3 gap-8 md:gap-16'>
-              {displayColumns.map((column, index) => (
-                <div key={index}>
+          {displayColumns.length > 0 && (
+            <div className='grid grid-cols-2 gap-8 md:gap-16'>
+              {displayColumns.map((column) => (
+                <div key={column.title}>
                   <p className='text-muted-foreground/50 mb-3 text-xs font-medium tracking-wider uppercase'>
                     {t(column.title)}
                   </p>
                   <ul className='space-y-2.5'>
-                    {column.links.map((link, linkIndex) => (
-                      <li key={linkIndex}>
+                    {column.links.map((link) => (
+                      <li key={`${column.title}-${link.href}`}>
                         <FooterLinkItem link={link} />
                       </li>
                     ))}
@@ -300,7 +318,7 @@ export function Footer(props: FooterProps) {
             </span>
             <LegalLinks leadingSeparator />
           </div>
-          <ProjectAttribution currentYear={currentYear} />
+          <ProjectAttribution />
         </div>
       </div>
     </footer>
