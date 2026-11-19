@@ -94,7 +94,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
     version="${APP_VERSION:-$(cat VERSION)}" && \
     go build \
-      -pgo="$(go list -m -f '{{.Dir}}' github.com/Calcium-Ion/moejs)/default.pgo" \
+      -pgo="$(go list -m -f '{{.Dir}}' github.com/MoeForge/moejs)/default.pgo" \
       -ldflags "-s -w -X 'github.com/QuantumNous/new-api/common.Version=${version}'" \
       -o new-api
 
