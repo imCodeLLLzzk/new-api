@@ -24,6 +24,7 @@ import ReactDOM from 'react-dom/client'
 import { installBuildMetadata } from '@/lib/build-metadata'
 import { applyFaviconToDom } from '@/lib/dom-utils'
 import '@/lib/dayjs'
+import { persistDocsLocale } from '@/lib/docs'
 import { initializeFrontendCache } from '@/lib/frontend-cache'
 import { createAppQueryClient } from '@/lib/query-client'
 import { readCachedStatus, statusQueryOptions } from '@/lib/status-query'
@@ -31,7 +32,7 @@ import { readCachedStatus, statusQueryOptions } from '@/lib/status-query'
 import { DirectionProvider } from './context/direction-provider'
 import { FontProvider } from './context/font-provider'
 import { ThemeProvider } from './context/theme-provider'
-import './i18n/config'
+import i18n from './i18n/config'
 // Generated Routes
 import { routeTree } from './routeTree.gen'
 
@@ -42,6 +43,9 @@ import './styles/index.css'
 // VChart theme is driven by our ThemeProvider (html.light/html.dark) via per-chart `theme` prop.
 initializeFrontendCache()
 installBuildMetadata()
+
+persistDocsLocale(i18n.resolvedLanguage || i18n.language)
+i18n.on('languageChanged', (language) => persistDocsLocale(language))
 
 const queryClient = createAppQueryClient(() => {
   void router.navigate({ to: '/500' })

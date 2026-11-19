@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next'
 
 import { useStatus } from '@/hooks/use-status'
 import { useSystemConfig } from '@/hooks/use-system-config'
+import { buildDocsUrl, DEFAULT_DOCS_BASE_URL } from '@/lib/docs'
 import { cn } from '@/lib/utils'
 
 interface FooterLink {
@@ -148,7 +149,7 @@ function ProjectAttribution(props: { inline?: boolean }) {
 }
 
 export function Footer(props: FooterProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { status } = useStatus()
   const {
     systemName,
@@ -161,7 +162,8 @@ export function Footer(props: FooterProps) {
   const displayName = systemName || props.name || 'LUI'
   const isDemoSiteMode = Boolean(demoSiteEnabled)
   const currentYear = new Date().getFullYear()
-  const docsLink = (status?.docs_link as string | undefined) || 'https://luiai.cc.cd/docs'
+  const docsBase = (status?.docs_link as string | undefined) || DEFAULT_DOCS_BASE_URL
+  const interfaceLanguage = i18n.resolvedLanguage || i18n.language
 
   const fallbackColumns = useMemo<FooterColumnProps[]>(
     () => [
@@ -170,19 +172,19 @@ export function Footer(props: FooterProps) {
         links: [
           {
             text: t('footer.columns.docs.links.quickStart'),
-            href: `${docsLink}/quickstart`,
+            href: buildDocsUrl(docsBase, 'quickstart', interfaceLanguage),
           },
           {
             text: t('footer.columns.docs.links.apiDocs'),
-            href: `${docsLink}/api`,
+            href: buildDocsUrl(docsBase, 'api', interfaceLanguage),
           },
           {
             text: t('Client integration'),
-            href: `${docsLink}/clients`,
+            href: buildDocsUrl(docsBase, 'clients', interfaceLanguage),
           },
           {
             text: t('FAQ'),
-            href: `${docsLink}/faq`,
+            href: buildDocsUrl(docsBase, 'faq', interfaceLanguage),
           },
         ],
       },
@@ -225,7 +227,7 @@ export function Footer(props: FooterProps) {
         ],
       },
     ],
-    [docsLink, t]
+    [docsBase, interfaceLanguage, t]
   )
 
   const displayColumns =
