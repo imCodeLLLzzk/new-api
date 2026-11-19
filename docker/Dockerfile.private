@@ -14,18 +14,33 @@
 #     proxy.golang.org is not reachable from the CN network.
 #   - BuildKit cache mounts for the Go module/build cache and the Bun install
 #     cache, so repeated builds do not re-download everything.
-#   - APP_VERSION can be overridden at build time; it falls back to ./VERSION.
+#   - APP_VERSION is REQUIRED. Follow upstream exactly: upstream derives the
+#     version from the git tag only (see .github/workflows/release.yml and
+#     docker-build.yml -> "Resolve tag & write VERSION"). The repo's VERSION
+#     file is never a source of truth: upstream keeps it blank (see "fix: add a
+#     blank VERSION file"), so `cat VERSION` yields "" / "dev" / a stale rc.XX.
 #   - base image digests are intentionally NOT pinned: a digest pins one
 #     platform only and would break multi-arch (manifest list) builds.
 #
 # Build & push (run from the repository root, the build context is the repo):
-#   docker buildx create --name mybuilder --driver docker-container \
-#     --config docker/buildkitd.toml --bootstrap
+#
+#   ./docker/build-push.sh
+#
+#   The script derives APP_VERSION exactly like upstream's release.yml does:
+#     git describe --tags --match 'v[0-9]*'
+#   i.e. "<latest official release tag>-<commits since>-<exact commit>", and it
+#   creates the buildx builder on demand. Upstream cutting a new tag needs no
+#   change here. Pin a release build with:
+#     ./docker/build-push.sh v1.0.0-rc.49
+#
+#   Equivalent raw command:
 #   docker buildx build --builder mybuilder -f docker/Dockerfile.private \
 #     --platform linux/amd64,linux/arm64 \
-#     --build-arg APP_VERSION=v1.0.0 \
-#     -t 192.168.0.163:5000/new-api:latest \
-#     --push .
+#     --build-arg APP_VERSION="$(git describe --tags --match 'v[0-9]*')" \
+#     -t 192.168.0.163:5000/new-api:latest --push .
+#
+# Do NOT use `git describe --abbrev=0` alone: it drops the commit count and
+# yields a stale tag when HEAD is many commits past the last release.
 #
 # The companion buildkitd.toml is only required for a docker-container builder
 # that cannot reach registry-1.docker.io directly (it does not inherit the
@@ -50,7 +65,7 @@ COPY ./web ./
 # The frontend is platform independent, so it is always built for BUILDPLATFORM.
 RUN --mount=type=cache,target=/root/.bun/install/cache \
     DISABLE_ESLINT_PLUGIN='true' \
-    VITE_REACT_APP_VERSION=${APP_VERSION:-dev} \
+    VITE_REACT_APP_VERSION=${APP_VERSION:?APP_VERSION is required} \
     bun run build
 
 # ---------------------------------------------------------------------------
@@ -84,10 +99,9 @@ COPY --from=web-builder /build/web/dist ./web/dist
 
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
-    version="${APP_VERSION:-$(cat VERSION)}" && \
     go build \
       -pgo="$(go list -m -f '{{.Dir}}' github.com/Calcium-Ion/moejs)/default.pgo" \
-      -ldflags "-s -w -X 'github.com/QuantumNous/new-api/common.Version=${version}'" \
+      -ldflags "-s -w -X 'github.com/QuantumNous/new-api/common.Version=${APP_VERSION:?APP_VERSION is required}'" \
       -o new-api
 
 # ---------------------------------------------------------------------------
