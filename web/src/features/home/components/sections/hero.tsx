@@ -23,6 +23,7 @@ import { useTranslation } from 'react-i18next'
 import { CopyButton } from '@/components/copy-button'
 import { Button } from '@/components/ui/button'
 import { useStatus } from '@/hooks/use-status'
+import { buildDocsUrl, DEFAULT_DOCS_BASE_URL } from '@/lib/docs'
 import { getLobeIcon } from '@/lib/lobe-icon'
 
 import {
@@ -48,9 +49,14 @@ interface HeroProps {
 }
 
 export function Hero(props: HeroProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { status } = useStatus()
-  const docsUrl = (status?.docs_link as string | undefined) || BRAND.site
+  const docsBase = (status?.docs_link as string | undefined) || DEFAULT_DOCS_BASE_URL
+  const docsUrl = buildDocsUrl(
+    docsBase,
+    undefined,
+    i18n.resolvedLanguage || i18n.language
+  )
 
   const renderDocsButton = () => {
     const isExternal = docsUrl.startsWith('http')
